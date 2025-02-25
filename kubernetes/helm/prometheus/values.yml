@@ -1,0 +1,40 @@
+serverFiles:
+  prometheus.yml:
+    scrape_configs:
+      # Here are scrape jobs that pull ServiceControl API data into Prometheus from the metrics exporter endpoints
+      # we label them with a common group so that it's easy to query
+      - job_name: 'service-control-queue-depth-alpha'
+        scrape_interval: 5s
+        metrics_path: /Alpha/queue-depth
+        static_configs:
+          - targets: 
+            - 'service-control-metric-exporter:33699'
+            labels:
+              group: 'nservicebus-endpoint-data'
+
+      - job_name: 'service-control-critical-time-alpha'
+        scrape_interval: 5s
+        metrics_path: /Alpha/critical-time
+        static_configs:
+          - targets: 
+            - 'service-control-metric-exporter:33699'
+            labels:
+              group: 'nservicebus-endpoint-data'
+
+      - job_name: 'service-control-queue-depth-beta'
+        scrape_interval: 5s
+        metrics_path: /Beta/queue-depth
+        static_configs:
+          - targets: 
+            - 'service-control-metric-exporter:33699'
+            labels:
+              group: 'nservicebus-endpoint-data'
+
+      - job_name: 'service-control-critical-time-beta'
+        scrape_interval: 5s
+        metrics_path: /Beta/critical-time
+        static_configs:
+          - targets: 
+            - 'service-control-metric-exporter:33699'
+            labels:
+              group: 'nservicebus-endpoint-data'
