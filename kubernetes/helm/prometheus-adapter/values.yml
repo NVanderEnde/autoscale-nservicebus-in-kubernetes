@@ -1,0 +1,23 @@
+prometheus:
+  # This URL should point at your Prometheus service. It should match the name you give the Helm release that you've installed.
+  url: http://prometheus-server
+  port: 80
+rules:
+  default: false
+  external:
+    - seriesQuery: '{group="nservicebus-endpoint-data",__name__=~".*queue_depth"}'
+      resources:
+        overrides:
+          group: {resource: "namespace"}
+      name:
+        matches: "^(.*)_queue_depth"
+        as: "${1}_queue_depth"
+      metricsQuery: '<<.Series>>'
+    - seriesQuery: '{group="nservicebus-endpoint-data",__name__=~".*critical_time"}'
+      resources:
+        overrides:
+          group: {resource: "namespace"}
+      name:
+        matches: "^(.*)_critical_time"
+        as: "${1}_critical_time"
+      metricsQuery: 'sum(rate(<<.Series>>[5m])) by (<<.GroupBy>>)'
