@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-control-metric-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service-control-metric-exporter
+  template:
+    metadata:
+      labels:
+        app: service-control-metric-exporter
+    spec:
+      containers:
+      - name: service-control-metric-exporter
+        image: service-control-metric-exporter:latest
+        imagePullPolicy: Never
+        env:
+        - name: MONITORING_API_HOST
+          value: "servicecontrol-monitoring-service:33633"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-control-metric-exporter
+spec:
+  selector:
+    app: service-control-metric-exporter
+  ports:
+    - protocol: TCP
+      port: 33699
+      targetPort: 8080
