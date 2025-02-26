@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alpha-endpoint
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alpha-endpoint
+  template:
+    metadata:
+      labels:
+        app: alpha-endpoint
+    spec:
+      containers:
+      - name: alpha-endpoint
+        image: alpha-app:latest
+        imagePullPolicy: Never
+        env:
+        - name: RABBITMQ_HOSTNAME
+          value: "rabbitmq"
