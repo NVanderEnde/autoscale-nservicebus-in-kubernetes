@@ -1,25 +1,29 @@
-using NServiceBus;
-
 namespace Common;
 
 public static class ExampleEndpoint
 {
-    public static async Task<IEndpointInstance> CreateAndStartNServiceBusEndpoint(string endpointName, CancellationTokenSource turnMeOff, Action<EndpointConfiguration>? customConfiguration = null)
+    public static async Task<IEndpointInstance> CreateAndStartNServiceBusEndpoint(string endpointName, CancellationTokenSource turnMeOff, bool sendOnly = false)
     {
-        var endpointConfiguration = new EndpointConfiguration(endpointName);
+        EndpointConfiguration endpointConfiguration = new(endpointName);
         var rabbitMQHostname = Environment.GetEnvironmentVariable("RABBITMQ_HOSTNAME") ?? "localhost";
         endpointConfiguration.UseTransport<RabbitMQTransport>()
             .ConnectionString($"host={rabbitMQHostname};username=guest;password=guest")
             .UseConventionalRoutingTopology(QueueType.Quorum);
         endpointConfiguration.UseSerialization<SystemJsonSerializer>();
         endpointConfiguration.EnableInstallers();
-        var metrics = endpointConfiguration.EnableMetrics();
-        metrics.SendMetricDataToServiceControl(
-            serviceControlMetricsAddress: "Particular.Monitoring",
-            interval: TimeSpan.FromSeconds(2)
-        );
-        customConfiguration?.Invoke(endpointConfiguration);
-        var startableEndpoint = await NServiceBus.Endpoint.Create(endpointConfiguration);
+        if (sendOnly)
+        {
+            endpointConfiguration.SendOnly();
+        }
+        else
+        {
+            var metrics = endpointConfiguration.EnableMetrics();
+            metrics.SendMetricDataToServiceControl(
+                serviceControlMetricsAddress: "Particular.Monitoring",
+                interval: TimeSpan.FromSeconds(2)
+            );
+        }
+        var startableEndpoint = await Endpoint.Create(endpointConfiguration);
         var endpointInstance = await startableEndpoint.Start(turnMeOff.Token);
         return endpointInstance;
     }

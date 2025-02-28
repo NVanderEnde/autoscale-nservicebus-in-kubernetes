@@ -9,7 +9,7 @@ Console.CancelKeyPress += (s, e) =>
     e.Cancel = true;
 };
 
-var endpointInstance = await ExampleEndpoint.CreateAndStartNServiceBusEndpoint("Event_Producer", stop, c => c.SendOnly());
+var endpointInstance = await ExampleEndpoint.CreateAndStartNServiceBusEndpoint("Event_Producer", stop, sendOnly: true);
 
 while (!stop.IsCancellationRequested)
 {
@@ -19,6 +19,7 @@ while (!stop.IsCancellationRequested)
     {
         for (int i = 0; i < amount; i++)
         {
+            if (stop.IsCancellationRequested) break;
             await endpointInstance.Publish(new SomeGreatEvent(Guid.NewGuid()));
         }
     }
